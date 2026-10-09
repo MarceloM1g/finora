@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  passwordHash String
+
+  payments Payment[]
+  clients   Client[]
+  services Service[]
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  userId      String
+  clientId    String
+  amount      Decimal
+  status      PaymentStatus @default(PENDING)
+  description String?
+
+  user User @relation(fields: [userId], references: [id])
+  client  Client  @relation(fields: [clientId], references: [id])
+
+  items PaymentItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([clientId])
+}
+
+model PaymentItem {
+  id          String        @id @default(uuid())
+  paymentId   String
+  serviceId   String
+
+  name        String
+  price       Decimal
+
+  payment Payment @relation(fields: [paymentId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+}
+
+model Client {
+  id          String        @id @default(uuid())
+  userId      String
+  name        String
+  email       String
+
+  payments Payment[]
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Service {
+  id          String        @id @default(uuid())
+  userId      String
+  name        String
+  price       Decimal
+
+  paymentItems PaymentItem[]
+  
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
