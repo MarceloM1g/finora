@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { RegisterSchema } from "../schemas/register.schema.js";
 import {
   COOKIE_NAME,
   cookieOptions,
@@ -11,26 +12,23 @@ import {
 
 export async function register(req: Request, res: Response) {
   try {
-    const { name, email, password } = req.body;
+    const result = RegisterSchema.safeParse(req.body);
 
-    if (!name?.trim() || !email?.trim() || !password?.trim()) {
+    if (!result.success) {
       return res.status(400).json({
-        error: "Todos os campos são obrigatórios",
+        error: "Dados inválidos",
+        details: result.error.issues.map((issue) => ({
+          field: issue.path.join("."),
+          message: issue.message,
+        })),
       });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const emailNormalized = email.trim().toLowerCase();
-
-    if (!emailRegex.test(emailNormalized)) {
-      return res.status(400).json({
-        error: "E-mail inválido",
-      });
-    }
+    const { name, email, password } = result.data;
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        email: emailNormalized,
+        email,
       },
     });
 
@@ -45,7 +43,7 @@ export async function register(req: Request, res: Response) {
     await prisma.user.create({
       data: {
         name,
-        email: emailNormalized,
+        email,
         passwordHash: hashedPassword,
       },
     });

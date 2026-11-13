@@ -3,6 +3,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "../../components/toast/ToastProvider";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import axios from "axios";
+import api from "../../lib/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,39 +16,23 @@ export default function Login() {
   const { setUser, user } = useAuth();
   const navigate = useNavigate();
 
-  const API_URL = import.meta.env.VITE_API_URL;
-
   async function LoginUser(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (email.trim() === "" || password.trim() === "") {
-      alert("Preencha todos os campos");
+      toast("Preencha todos os campos", "error");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      const response = await api.post("/auth/login", {
+        email,
+        password,
       });
 
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        toast(data?.error ?? "Erro inesperado ao fazer login", "error");
-        return;
-      }
-
-      setUser(data.user);
+      setUser(response.data.user);
 
       toast("Logado com sucesso!", "success");
       setEmail("");
@@ -54,7 +40,15 @@ export default function Login() {
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast("Não foi possível conectar ao servidor.", "error");
+      if (axios.isAxiosError(error)) {
+        toast(
+          error.response?.data?.error ??
+            "Não foi possível conectar ao servidor.",
+          "error",
+        );
+      } else {
+        toast("Ocorreu um erro inesperado.", "error");
+      }
     } finally {
       setLoading(false);
     }
@@ -63,7 +57,7 @@ export default function Login() {
   useEffect(() => {
     function isUserLogged() {
       if (user) {
-        navigate('/dashboard')
+        navigate("/dashboard");
       }
     }
 

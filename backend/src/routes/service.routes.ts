@@ -10,4 +10,4 @@ router.get("/", authMiddleware, getService);
 router.delete("/:id", authMiddleware, deleteService);
 router.put("/:id", authMiddleware, editService);
 
-export default router
+export default router;

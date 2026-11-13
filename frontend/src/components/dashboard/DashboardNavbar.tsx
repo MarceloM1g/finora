@@ -9,7 +9,7 @@ export default function DashboardNavbar() {
   const [menu, setMenu] = useState(false);
 
   return (
-    <nav className="w-full bg-secondary border-b border-white/20">
+    <nav className="sticky top-0 z-50 w-full bg-secondary border-b border-white/20">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <Link to="/dashboard">

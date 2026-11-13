@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "../../components/toast/ToastProvider";
 import { useNavigate } from "react-router-dom";
+import { LoadingBtn } from "../../components/loading/LoadingBtn";
+import axios from "axios";
+import api from "../../lib/api";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -11,6 +14,8 @@ export default function Register() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -45,28 +50,35 @@ export default function Register() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      const response = await fetch("http://localhost:3000/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-        }),
+      await api.post("/auth/register", {
+        name,
+        email,
+        password,
       });
 
-      if (!response.ok) {
-        toast("Erro ao registrar Usuário");
-        return;
-      }
-
       toast("Conta criada com sucesso!", "success");
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
       navigate("/login");
     } catch (error) {
       console.error(error);
+
+      if (axios.isAxiosError(error)) {
+        toast(
+          error.response?.data?.error ??
+            "Não foi possível conectar ao servidor.",
+          "error",
+        );
+      } else {
+        toast("Ocorreu um erro inesperado.", "error");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -200,9 +212,10 @@ export default function Register() {
             {/* Botão */}
             <button
               type="submit"
+              disabled={loading}
               className="mt-2 h-12 w-full rounded-xl bg-primary font-semibold text-background transition hover:brightness-110 active:scale-[0.99]"
             >
-              Criar conta
+              {loading ? <LoadingBtn /> : <span>Criar conta</span>}
             </button>
           </form>
 

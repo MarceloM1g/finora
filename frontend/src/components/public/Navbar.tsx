@@ -1,15 +1,13 @@
 import { Link } from "react-router-dom";
-import Logo from "../../assets/finora-logo.png";
+import Logo from "../../assets/logo.png";
 
 export default function Navbar() {
   return (
-    <nav className="w-full border-b border-white/10 bg-background">
+    <nav className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-background">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
-        <Link
-          to="/"
-        >
-          <img className="w-50 h-auto" src={Logo} alt="Finora Logo" />
+        <Link to="/dashboard">
+          <img className="w-20 h-auto" src={Logo} alt="Finora Logo" />
         </Link>
 
         {/* Links - desktop */}

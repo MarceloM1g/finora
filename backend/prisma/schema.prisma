@@ -14,9 +14,8 @@ model User {
   passwordHash String
 
   payments Payment[]
-  clients   Client[]
+  clients  Client[]
   services Service[]
-
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -27,11 +26,14 @@ model Payment {
   userId      String
   clientId    String
   amount      Decimal
-  status      PaymentStatus @default(PENDING)
+  status      PaymentStatus @default(PENDING)       
   description String?
 
-  user User @relation(fields: [userId], references: [id])
-  client  Client  @relation(fields: [clientId], references: [id])
+  date        String
+  time        String?
+
+  user   User   @relation(fields: [userId], references: [id])
+  client Client @relation(fields: [clientId], references: [id])
 
   items PaymentItem[]
 
@@ -43,22 +45,22 @@ model Payment {
 }
 
 model PaymentItem {
-  id          String        @id @default(uuid())
-  paymentId   String
-  serviceId   String
+  id        String @id @default(uuid())
+  paymentId String
+  serviceId String
 
-  name        String
-  price       Decimal
+  name  String
+  price Decimal
 
-  payment Payment @relation(fields: [paymentId], references: [id])
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   service Service @relation(fields: [serviceId], references: [id])
 }
 
 model Client {
-  id          String        @id @default(uuid())
-  userId      String
-  name        String
-  email       String
+  id     String  @id @default(uuid())
+  userId String
+  name   String
+  email  String?
 
   payments Payment[]
 
@@ -66,13 +68,13 @@ model Client {
 }
 
 model Service {
-  id          String        @id @default(uuid())
-  userId      String
-  name        String
-  price       Decimal
+  id     String  @id @default(uuid())
+  userId String
+  name   String
+  price  Decimal
 
   paymentItems PaymentItem[]
-  
+
   user User @relation(fields: [userId], references: [id])
 }
 

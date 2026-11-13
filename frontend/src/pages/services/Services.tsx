@@ -14,9 +14,7 @@ export default function Services() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   const [loading, setLoading] = useState(true);
-
   const [search, setSearch] = useState("");
-
   const { toast } = useToast();
 
   useEffect(() => {
@@ -95,7 +93,7 @@ export default function Services() {
 
       <div className="bg-secondary p-4 rounded-xl mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <Link
-          to="/service/create"
+          to="/services/create"
           className="bg-primary rounded-xl px-4 py-3 inline-flex items-center justify-center gap-2 shrink-0"
         >
           <Plus size={18} strokeWidth={2.5} />

@@ -1,5 +1,5 @@
 import { useAuth } from "../../contexts/AuthContext";
-import { House, CircleDollarSign, Wrench  } from "lucide-react";
+import { House, CircleDollarSign, Wrench, User  } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Dashboard() {
@@ -7,16 +7,22 @@ export default function Dashboard() {
 
   const dashboardItems = [
     {
-      title: "Criar Pagamento",
-      description: "Gerencie os usuários do sistema",
+      title: "Ordem De Serviço",
+      description: "Gerencie e crie suas Ordem de Serviço",
       icon: CircleDollarSign,
       path: "/payments",
     },
     {
-      title: "Criar e Gerenciar Serviços",
+      title: "Serviços",
       description: "Cadastre e gerencie os serviços do sistema",
       icon: Wrench,
-      path: "/service",
+      path: "/services",
+    },
+    {
+      title: "Clientes",
+      description: "Cadastre e gerencie os seus clientes",
+      icon: User,
+      path: "/clients",
     },
   ];
 
@@ -41,7 +47,7 @@ export default function Dashboard() {
 
             <div>
               <p className="text-sm text-gray-600">Acessar</p>
-              <h2 className="font-semibold">{item.title}</h2>
+              <h2 className="text-xl font-semibold">{item.title}</h2>
               <p className="mt-1 text-sm text-foreground">{item.description}</p>
             </div>
           </Link>
