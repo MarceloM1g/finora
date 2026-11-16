@@ -4,5 +4,16 @@
   --color-primary: #36BBFF;
   --color-secondary: #0F1116;
   --color-background: #171a21;
-  --color-foreground: #F7F7F7; 
+  --color-foreground: #F7F7F7;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: #171a21;
+}
+
+html {
+  overscroll-behavior-y: none;
 }
