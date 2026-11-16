@@ -1,6 +1,9 @@
-
 {
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://finora-6fhc.onrender.com/:path*"
+    },
     {
       "source": "/(.*)",
       "destination": "/"
