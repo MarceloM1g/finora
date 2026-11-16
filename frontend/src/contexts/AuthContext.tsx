@@ -6,6 +6,8 @@ import {
   type ReactNode,
 } from "react";
 
+import api from "../lib/api";
+
 type User = {
   name: string;
   email: string;
@@ -18,8 +20,6 @@ type AuthContextType = {
   logout: () => Promise<void>;
 };
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -31,17 +31,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function loadUser() {
       try {
-        const response = await fetch(`${API_URL}/auth/me`, {
-          credentials: "include",
+        const response = await api.get("/auth/me", {
           signal: controller.signal,
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
+        setUser(response.data.user);
       } catch (error) {
         if (!controller.signal.aborted) {
           console.error(error);
@@ -61,12 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function logout() {
     try {
-      const response = await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await api.post("/auth/logout");
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         console.error("Falha ao fazer logout:", response.status);
         return;
       }
