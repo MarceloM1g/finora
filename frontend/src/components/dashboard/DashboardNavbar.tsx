@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Logo from "../../assets/logo.png";
+import Logo from "../../assets/finora-new-logo.png";
 import { useAuth } from "../../contexts/AuthContext";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
