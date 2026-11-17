@@ -174,7 +174,7 @@ export default function PaymentForm({ payment, onSuccess }: Props) {
           Ordem de Serviço
         </Link>
         <span aria-hidden="true">/</span>
-        <h1 className="text-white"> {payment ? ("Editar OS") : ("Criar OS")} </h1>
+        <h1 className="text-white"> {payment ? "Editar OS" : "Criar OS"} </h1>
       </header>
 
       <section
@@ -183,7 +183,7 @@ export default function PaymentForm({ payment, onSuccess }: Props) {
       >
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">
-            {payment ? ("Editar Ordem de Serviço") : ("Criar Ordem de Serviço")}
+            {payment ? "Editar Ordem de Serviço" : "Criar Ordem de Serviço"}
           </h1>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -325,25 +325,57 @@ export default function PaymentForm({ payment, onSuccess }: Props) {
             )}
           </div>
 
-          {/* Data */}
-          <label htmlFor="date" className="text-xl font-semibold">
-            Data
-          </label>
+          {/* Data e horário */}
+          <div className="space-y-3">
+            <label className="text-xl font-semibold">Data e horário</label>
 
-          <input
-            type="date"
-            id="date"
-            name="date"
-            min={today}
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="relative">
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  min={today}
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="
+          w-full h-14
+          rounded-xl
+          border border-foreground/15
+          bg-secondary
+          px-4
+          text-base text-foreground
+          outline-none
+          transition
+          focus:border-primary
+          focus:ring-2 focus:ring-primary/20
+          cursor-pointer
+        "
+                />
+              </div>
 
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-          />
+              <input
+                type="time"
+                id="time"
+                name="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="
+        w-full h-14
+        rounded-xl
+        border border-foreground/15
+        bg-secondary
+        px-4
+        text-base text-foreground
+        outline-none
+        transition
+        focus:border-primary
+        focus:ring-2 focus:ring-primary/20
+        cursor-pointer
+      "
+              />
+            </div>
+          </div>
 
           {/* Description */}
           <div className="flex flex-col gap-2">

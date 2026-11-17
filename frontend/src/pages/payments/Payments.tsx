@@ -350,6 +350,17 @@ export default function Payments() {
                     </header>
 
                     <ul className="mt-3 flex flex-col gap-2">
+                      {payment.description && (
+                        <div className="mb-4">
+                          <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2 text-foreground/50">
+                            Descrição
+                          </h2>
+                          <p className="line-clamp-2 text-sm">
+                            {payment.description}
+                          </p>
+                        </div>
+                      )}
+
                       <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2 text-foreground/50">
                         Serviços
                       </h2>
@@ -357,8 +368,8 @@ export default function Payments() {
                         <li
                           key={item.id}
                           className="flex items-center justify-between gap-4 text-base"
-                        >
-                          <span>{item.name}</span>
+                        >                   
+                          <span>{item.name}</span>                
                           <span className="tabular-nums">
                             {formatBRL(item.price)}
                           </span>
