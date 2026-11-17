@@ -80,7 +80,7 @@ model Service {
 
 enum PaymentStatus {
   PENDING
-  PAID
+  FINALIZED
   OVERDUE
   CANCELLED
 }

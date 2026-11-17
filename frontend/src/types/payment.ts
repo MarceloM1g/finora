@@ -8,7 +8,7 @@ export type PaymentItem = {
   price: number;
 };
 
-export type PaymentStatus = "PENDING" | "PAID" | "CANCELLED" | "OVERDUE";
+export type PaymentStatus = "PENDING" | "FINALIZED" | "CANCELLED" | "OVERDUE";
 
 export type Payment = {
   id: string;

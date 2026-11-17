@@ -7,6 +7,8 @@ import {
   Pencil,
   Trash2,
   X,
+  Bookmark,
+  CheckCircle,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Loading } from "../../components/loading/Loading";
@@ -20,13 +22,15 @@ import PaymentForm from "./PaymentForm";
 export default function Payments() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   const [searchName, setSearchName] = useState("");
   const [searchService, setSearchService] = useState("");
 
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
+  const [selectedOsId, setSelectedOsId] = useState<string | null>(null);
+
+  const { toast } = useToast();
 
   /* Buscar OS */
   useEffect(() => {
@@ -108,9 +112,9 @@ export default function Payments() {
       className:
         "bg-yellow-500/80 text-white font-semibold border-yellow-500/20",
     },
-    PAID: {
-      label: "Pago",
-      className: "bg-green-500/10 text-green-600 border-green-500/20",
+    FINALIZED: {
+      label: "Finalizada",
+      className: "bg-green-500/80 text-wgite font-semibold border-green-500/20",
     },
     CANCELLED: {
       label: "Cancelado",
@@ -138,6 +142,26 @@ export default function Payments() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  async function finishOs(id: string) {
+    try {
+      await api.patch(`/payments/${id}/finalize`);
+      toast("OS Finalizada com sucesso!", "success");
+      await reloadPayments();
+    } catch (error) {
+      console.error(error);
+      setOpenMenuId(null);
+      if (axios.isAxiosError(error)) {
+        toast(
+          error.response?.data?.error ??
+            "Não foi possível conectar ao servidor.",
+          "error",
+        );
+      } else {
+        toast("Ocorreu um erro inesperado.", "error");
+      }
+    }
+  }
 
   if (loading) {
     return <Loading />;
@@ -171,6 +195,51 @@ export default function Payments() {
                 setSelectedPayment(null);
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Menu de alterar status */}
+      {selectedOsId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="relative w-full max-w-[500px] max-h-[90vh] overflow-y-auto rounded-xl bg-background p-4">
+            <header className="flex gap-2 mb-4">
+              <Bookmark className="bg-secondary p-2 rounded-lg" size={45} />
+              <h2 className="flex items-center justify-center text-xl font-bold text-foreground/80">
+                Alterar Status
+              </h2>
+            </header>
+
+            <button
+              type="button"
+              onClick={() => setSelectedOsId(null)}
+              className="absolute right-3 top-3"
+              aria-label="Fechar edição"
+            >
+              <X size={30} />
+            </button>
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  await finishOs(selectedOsId);
+                  setSelectedOsId(null);
+                }}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-secondary transition-all hover:brightness-110 active:scale-[0.98]"
+              >
+                <CheckCircle size={19} />
+                Finalizar Ordem de Serviço
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedOsId(null)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 font-medium text-foreground/70 transition-colors hover:bg-white/10"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -320,16 +389,30 @@ export default function Payments() {
                             ref={menuRef}
                             className="absolute right-0 top-full z-20 mt-2 w-44 overflow-hidden rounded-xl border border-white/2 bg-secondary p-1.5"
                           >
+                            {payment.status !== "FINALIZED" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedPayment(payment);
+                                  setOpenMenuId(null);
+                                }}
+                                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground/80 transition-colors hover:bg-primary/10 hover:text-primary"
+                              >
+                                <Pencil size={16} aria-hidden="true" />
+                                <span>Editar OS</span>
+                              </button>
+                            )}
+
                             <button
                               type="button"
                               onClick={() => {
-                                setSelectedPayment(payment);
+                                setSelectedOsId(payment.id);
                                 setOpenMenuId(null);
                               }}
                               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground/80 transition-colors hover:bg-primary/10 hover:text-primary"
                             >
-                              <Pencil size={16} aria-hidden="true" />
-                              <span>Editar OS</span>
+                              <Bookmark size={16} aria-hidden="true" />
+                              <span>Status</span>
                             </button>
 
                             <div className="my-1 border-t border-white/5" />
@@ -368,8 +451,8 @@ export default function Payments() {
                         <li
                           key={item.id}
                           className="flex items-center justify-between gap-4 text-base"
-                        >                   
-                          <span>{item.name}</span>                
+                        >
+                          <span>{item.name}</span>
                           <span className="tabular-nums">
                             {formatBRL(item.price)}
                           </span>

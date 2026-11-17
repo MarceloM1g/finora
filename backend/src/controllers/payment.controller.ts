@@ -97,7 +97,7 @@ export async function getPayments(req: Request, res: Response) {
       },
       orderBy: {
         createdAt: "desc",
-      }
+      },
     });
 
     return res.status(200).json({
@@ -149,6 +149,33 @@ export async function updatePayment(req: Request, res: Response) {
   try {
     const result = UpdatePaymentSchema.safeParse(req.body);
 
+    const { id } = req.params;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        error: "ID da Ordem de Serviço inválido",
+      });
+    }
+
+    const payment = await prisma.payment.findFirst({
+      where: {
+        id,
+        userId: req.user.id,
+      },
+    });
+
+    if (!payment) {
+      return res.status(404).json({
+        error: "Ordem de Serviço não encontrada",
+      });
+    }
+
+    if (payment.status === "FINALIZED") {
+      return res.status(400).json({
+        error: "Esta Ordem de Serviço já foi finalizada",
+      });
+    }
+
     if (!result.success) {
       return res.status(400).json({
         error: "Dados inválidos",
@@ -197,27 +224,6 @@ export async function updatePayment(req: Request, res: Response) {
           error: "Um ou mais serviços não foram encontrados",
         });
       }
-    }
-
-    const { id } = req.params;
-
-    if (typeof id !== "string") {
-      return res.status(400).json({
-        error: "ID da Ordem de Serviço inválido",
-      });
-    }
-
-    const payment = await prisma.payment.findFirst({
-      where: {
-        id,
-        userId: req.user.id,
-      },
-    });
-
-    if (!payment) {
-      return res.status(404).json({
-        error: "Ordem de Serviço não encontrada",
-      });
     }
 
     const data = {
@@ -271,6 +277,47 @@ export async function updatePayment(req: Request, res: Response) {
 
     return res.status(500).json({
       error: "Erro ao editar OS",
+    });
+  }
+}
+
+export async function finalizePayment(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        error: "ID da Ordem de Serviço inválido",
+      });
+    }
+
+    const result = await prisma.payment.updateMany({
+      where: {
+        id,
+        userId: req.user.id,
+        status: {
+          not: "FINALIZED",
+        },
+      },
+      data: {
+        status: "FINALIZED",
+      },
+    });
+
+    if (result.count === 0) {
+      return res.status(404).json({
+        error: "OS não encontrada ou já finalizada",
+      });
+    }
+
+    return res.status(200).json({
+      message: "OS finalizada com sucesso!",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Erro ao finalizar OS",
     });
   }
 }
