@@ -9,6 +9,7 @@ import {
   X,
   Bookmark,
   CheckCircle,
+  ChevronDown,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Loading } from "../../components/loading/Loading";
@@ -29,6 +30,9 @@ export default function Payments() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [selectedOsId, setSelectedOsId] = useState<string | null>(null);
+
+  const [openFilterByStatusMenu, setOpenFilterByStatusMenu] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   const { toast } = useToast();
 
@@ -73,9 +77,13 @@ export default function Payments() {
       item.name.toLowerCase().includes(searchService.toLowerCase()),
     );
 
+    const matchesStatus =
+      selectedStatus === "" || payment.status === selectedStatus;
+
     return (
       (searchName === "" || matchesClient) &&
-      (searchService === "" || matchesService)
+      (searchService === "" || matchesService) &&
+      matchesStatus
     );
   });
 
@@ -162,6 +170,15 @@ export default function Payments() {
       }
     }
   }
+
+  /* Valor Total de OS renderizada no array */
+  const totalFilteredPayments = filteredPayments.reduce((acc, payment) => {
+    const total = payment.items.reduce((acc, item) => {
+      return acc + Number(String(item.price).replace(",", "."));
+    }, 0);
+
+    return acc + total;
+  }, 0);
 
   if (loading) {
     return <Loading />;
@@ -285,6 +302,56 @@ export default function Payments() {
             placeholder="Buscar por Serviço"
             className="w-full rounded-xl border border-white/10 bg-secondary py-3 pl-10 pr-4 text-foreground outline-none transition-colors focus:border-primary"
           />
+        </div>
+
+        {/* Filtrar por Status */}
+        <div className="relative flex-1">
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-secondary py-3 px-3 text-foreground outline-none transition-colors hover:border-primary focus:border-primary"
+            onClick={() => setOpenFilterByStatusMenu(!openFilterByStatusMenu)}
+          >
+            <Bookmark size={18} className="text-gray-400" />
+
+            <span className="flex-1 text-left">
+              {selectedStatus === "FINALIZED"
+                ? "Finalizado"
+                : "Filtrar por Status"}
+            </span>
+
+            <ChevronDown
+              size={18}
+              className={`text-gray-400 transition-transform ${
+                openFilterByStatusMenu ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {openFilterByStatusMenu && (
+            <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-xl border border-foreground/10 bg-background p-2 shadow-xl">
+              <button
+                type="button"
+                className={`w-full rounded-lg p-2 text-left text-sm transition ${
+                  selectedStatus === "FINALIZED"
+                    ? "bg-primary text-secondary"
+                    : "hover:bg-foreground/5"
+                }`}
+                onClick={() => {
+                  setSelectedStatus(
+                    selectedStatus === "FINALIZED" ? "" : "FINALIZED",
+                  );
+                  setOpenFilterByStatusMenu(false);
+                }}
+              >
+                Finalizado
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Total de OS */}
+        <div>
+          <span>Total de OS: {formatBRL(totalFilteredPayments)}</span>
         </div>
       </div>
 
