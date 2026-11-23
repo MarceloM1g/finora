@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { Service } from "../../types/service";
 import { X, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -16,6 +16,12 @@ export default function ServiceCard({
   onToggle,
   onClose,
 }: ServiceCardProps) {
+  const [searchName, setSearchName] = useState("");
+
+  const filteredService = services.filter((service) => {
+    return service.name.toLowerCase().includes(searchName.toLowerCase());
+  });
+
   // Fecha com ESC e trava o scroll do body enquanto o modal está aberto
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -41,31 +47,52 @@ export default function ServiceCard({
         role="dialog"
         aria-modal="true"
         aria-labelledby="services-modal-title"
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl bg-background shadow-xl"
+        className="flex h-[80vh] w-full max-w-2xl flex-col rounded-xl bg-background shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-white/5 p-4">
-          <h2
-            id="services-modal-title"
-            className="text-lg font-semibold text-foreground"
-          >
-            Selecione os serviços
-          </h2>
+        <header className="bg-secondary rounded-xl mb-4">
+          <div className="flex justify-end p-2">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-foreground transition-colors duration-200 hover:bg-white/10"
+            >
+              <X />
+            </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar"
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-foreground transition-colors duration-200 hover:bg-white/10"
-          >
-            <X />
-          </button>
-        </div>
+          <div className="flex w-full flex-col items-stretch justify-between gap-3 p-4 md:flex-row md:items-center">
+            <h2 className="text-lg font-semibold">
+              Escolha os serviços, ou cadastre um novo.
+            </h2>
+
+            <Link
+              to="/services/create"
+              className="bg-primary rounded-xl px-4 py-3 inline-flex items-center justify-center gap-2 shrink-0"
+            >
+              <Plus className="text-secondary" size={18} strokeWidth={2.5} />
+              <span className="text-base font-semibold text-secondary">
+                Cadastrar mais Serviço
+              </span>
+            </Link>
+          </div>
+
+          <div className="p-2">
+            <input
+              type="text"
+              value={searchName}
+              onChange={(event) => setSearchName(event.target.value)}
+              placeholder="Buscar Serviço"
+              className="w-full rounded-xl border border-white/10 bg-secondary py-3 pl-10 pr-4 text-foreground outline-none transition-colors focus:border-primary"
+            />
+          </div>
+        </header>
 
         <div className="flex-1 overflow-y-auto p-4">
-          {services.length > 0 ? (
+          {filteredService.length > 0 ? (
             <ul className="flex flex-col gap-2">
-              {services.map((service) => {
+              {filteredService.map((service) => {
                 const isSelected = selectedServices.includes(service.id);
 
                 return (
