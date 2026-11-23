@@ -32,7 +32,9 @@ export default function Payments() {
   const [selectedOsId, setSelectedOsId] = useState<string | null>(null);
 
   const [openFilterByStatusMenu, setOpenFilterByStatusMenu] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(() => {
+    return localStorage.getItem("status-filter") || "";
+  });
 
   const { toast } = useToast();
 
@@ -112,6 +114,11 @@ export default function Payments() {
       }
     }
   }
+
+  /* Salvar Preferencia por filtro */
+  useEffect(() => {
+    localStorage.setItem("status-filter", selectedStatus);
+  }, [selectedStatus]);
 
   /* Config de estilos */
   const paymentStatusConfig = {
@@ -316,7 +323,9 @@ export default function Payments() {
             <span className="flex-1 text-left">
               {selectedStatus === "FINALIZED"
                 ? "Finalizado"
-                : "Filtrar por Status"}
+                : selectedStatus === "PENDING"
+                  ? "Pendente"
+                  : "Filtrar por Status"}
             </span>
 
             <ChevronDown
@@ -329,6 +338,34 @@ export default function Payments() {
 
           {openFilterByStatusMenu && (
             <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-xl border border-foreground/10 bg-background p-2 shadow-xl">
+              <button
+                type="button"
+                className={`w-full rounded-lg p-2 text-left text-sm transition`}
+                onClick={() => {
+                  setSelectedStatus("");
+                  setOpenFilterByStatusMenu(false);
+                }}
+              >
+                Todos
+              </button>
+
+              <button
+                type="button"
+                className={`w-full rounded-lg p-2 text-left text-sm transition ${
+                  selectedStatus === "PENDING"
+                    ? "bg-primary text-secondary"
+                    : "hover:bg-foreground/5"
+                }`}
+                onClick={() => {
+                  setSelectedStatus(
+                    selectedStatus === "PENDING" ? "" : "PENDING",
+                  );
+                  setOpenFilterByStatusMenu(false);
+                }}
+              >
+                Pendente
+              </button>
+
               <button
                 type="button"
                 className={`w-full rounded-lg p-2 text-left text-sm transition ${
@@ -405,8 +442,18 @@ export default function Payments() {
                           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground text-foreground/50">
                             Data
                           </span>
-                          <div className="flex gap-2 text-sm">
-                            <span>{formatDate(payment.date)}</span>
+                          <div className="flex gap-2 text-base">
+                            <span
+                              className={`${
+                                formatDate(payment.date) === "Hoje"
+                                  ? "text-primary font-medium"
+                                  : formatDate(payment.date) === "Amanhã"
+                                    ? "text-amber-300 font-medium"
+                                    : "text-foreground"
+                              }`}
+                            >
+                              {formatDate(payment.date)}
+                            </span>
                             <span className="text-muted-foreground">
                               {payment.time}
                             </span>
